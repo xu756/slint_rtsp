@@ -4,7 +4,7 @@ use ffmpeg_next::format::Pixel;
 
 mod player;
 
-const VIDEO_URL: &str = "rtmp://127.0.0.1:1935/predict";
+const VIDEO_URL: &str = "rtmp://127.0.0.1:1935/live/predict";
 
 fn main() -> anyhow::Result<()> {
     ffmpeg_next::init()?;
