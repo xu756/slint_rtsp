@@ -6,6 +6,14 @@ build = "src/build.rs"
 
 [dependencies]
 slint = "1.16.1"
+ffmpeg-next = "8.0.0"
+smol = "2.0.0"
+anyhow = "1.0"
+futures = "0.3.31"
+cpal = "0.15.3"
+ringbuf = "0.3.3"
+bytemuck = "1.23.1"
+derive_more = { version = "2.0.1", features = ["deref", "deref_mut"] }
 
 [build-dependencies]
 slint-build = "1.16.1"
