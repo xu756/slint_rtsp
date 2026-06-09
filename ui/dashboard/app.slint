@@ -1,0 +1,16 @@
+export component AppWindow inherits Window {
+    width: 500px;
+    height: 360px;
+    title: "Slint Dashboard";
+
+    VerticalLayout {
+        padding: 20px;
+        spacing: 12px;
+
+        Text {
+            text: "Hello Slint";
+            font-size: 24px;
+            horizontal-alignment: center;
+        }
+    }
+}
