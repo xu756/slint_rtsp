@@ -56,12 +56,42 @@ impl AudioPlaybackThread {
                             ),
                             output_channel_layout,
                         ),
+                        cpal::SampleFormat::I16 => FFmpegToCPalForwarder::new::<i16>(
+                            config,
+                            &device,
+                            packet_receiver,
+                            packet_decoder,
+                            ffmpeg_next::util::format::sample::Sample::I16(
+                                ffmpeg_next::util::format::sample::Type::Packed,
+                            ),
+                            output_channel_layout,
+                        ),
+                        cpal::SampleFormat::I32 => FFmpegToCPalForwarder::new::<i32>(
+                            config,
+                            &device,
+                            packet_receiver,
+                            packet_decoder,
+                            ffmpeg_next::util::format::sample::Sample::I32(
+                                ffmpeg_next::util::format::sample::Type::Packed,
+                            ),
+                            output_channel_layout,
+                        ),
                         cpal::SampleFormat::F32 => FFmpegToCPalForwarder::new::<f32>(
                             config,
                             &device,
                             packet_receiver,
                             packet_decoder,
                             ffmpeg_next::util::format::sample::Sample::F32(
+                                ffmpeg_next::util::format::sample::Type::Packed,
+                            ),
+                            output_channel_layout,
+                        ),
+                        cpal::SampleFormat::F64 => FFmpegToCPalForwarder::new::<f64>(
+                            config,
+                            &device,
+                            packet_receiver,
+                            packet_decoder,
+                            ffmpeg_next::util::format::sample::Sample::F64(
                                 ffmpeg_next::util::format::sample::Type::Packed,
                             ),
                             output_channel_layout,

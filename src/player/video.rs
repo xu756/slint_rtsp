@@ -18,21 +18,37 @@ impl VideoPlaybackThread {
     ) -> Result<Self, anyhow::Error> {
         let (control_sender, control_receiver) = smol::channel::unbounded();
 
-        let (packet_sender, packet_receiver) = smol::channel::bounded(128);
+        let (packet_sender, packet_receiver) =
+            smol::channel::bounded::<ffmpeg_next::codec::packet::packet::Packet>(128);
 
         let decoder_context = ffmpeg_next::codec::Context::from_parameters(stream.parameters())?;
         let mut packet_decoder = decoder_context.decoder().video()?;
 
-        let clock = StreamClock::new(stream);
+        let mut clock = StreamClock::new(stream);
 
         let receiver_thread =
             std::thread::Builder::new().name("video playback thread".into()).spawn(move || {
                 smol::block_on(async move {
                     let packet_receiver_impl = async {
+                        let mut waiting_for_key_frame = true;
+
                         loop {
                             let Ok(packet) = packet_receiver.recv().await else { break };
 
                             smol::future::yield_now().await;
+
+                            if packet.is_corrupt() {
+                                continue;
+                            }
+
+                            if waiting_for_key_frame {
+                                if !packet.is_key() {
+                                    continue;
+                                }
+
+                                waiting_for_key_frame = false;
+                                clock.reset();
+                            }
 
                             packet_decoder.send_packet(&packet).unwrap();
 
@@ -107,7 +123,8 @@ impl Drop for VideoPlaybackThread {
 
 struct StreamClock {
     time_base_seconds: f64,
-    start_time: std::time::Instant,
+    playback_start_time: std::time::Instant,
+    first_pts: Option<i64>,
 }
 
 impl StreamClock {
@@ -116,17 +133,28 @@ impl StreamClock {
         let time_base_seconds =
             time_base_seconds.numerator() as f64 / time_base_seconds.denominator() as f64;
 
-        let start_time = std::time::Instant::now();
+        let playback_start_time = std::time::Instant::now();
 
-        Self { time_base_seconds, start_time }
+        Self {
+            time_base_seconds,
+            playback_start_time,
+            first_pts: None,
+        }
     }
 
-    fn convert_pts_to_instant(&self, pts: Option<i64>) -> Option<std::time::Duration> {
+    fn convert_pts_to_instant(&mut self, pts: Option<i64>) -> Option<std::time::Duration> {
         pts.and_then(|pts| {
+            let first_pts = *self.first_pts.get_or_insert(pts);
+            let relative_pts = pts.saturating_sub(first_pts);
             let pts_since_start =
-                std::time::Duration::from_secs_f64(pts as f64 * self.time_base_seconds);
-            self.start_time.checked_add(pts_since_start)
+                std::time::Duration::from_secs_f64(relative_pts as f64 * self.time_base_seconds);
+            self.playback_start_time.checked_add(pts_since_start)
         })
-        .map(|absolute_pts| absolute_pts.duration_since(std::time::Instant::now()))
+        .map(|absolute_pts| absolute_pts.saturating_duration_since(std::time::Instant::now()))
+    }
+
+    fn reset(&mut self) {
+        self.playback_start_time = std::time::Instant::now();
+        self.first_pts = None;
     }
 }

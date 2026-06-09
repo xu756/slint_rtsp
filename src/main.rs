@@ -4,13 +4,14 @@ use ffmpeg_next::format::Pixel;
 
 mod player;
 
-const VIDEO_URL: &str = "rtsp://213.34.225.97/axis-media/media.amp";
+const VIDEO_URL: &str = "rtmp://127.0.0.1:1935/predict";
 
 fn main() -> anyhow::Result<()> {
+    ffmpeg_next::init()?;
+
     let app = App::new()?;
 
-
-    let url = std::path::PathBuf::from(VIDEO_URL);  
+    let url = std::path::PathBuf::from(VIDEO_URL);
     let mut to_rgb_rescaler: Option<Rescaler> = None;
 
     let mut player = player::Player::start(
@@ -19,13 +20,11 @@ fn main() -> anyhow::Result<()> {
             let app_weak = app.as_weak();
 
             move |new_frame| {
-                let rebuild_rescaler = to_rgb_rescaler
-                    .as_ref()
-                    .is_none_or(|existing_rescaler| {
-                        existing_rescaler.input().format != new_frame.format()
-                            || existing_rescaler.input().width != new_frame.width()
-                            || existing_rescaler.input().height != new_frame.height()
-                    });
+                let rebuild_rescaler = to_rgb_rescaler.as_ref().is_none_or(|existing_rescaler| {
+                    existing_rescaler.input().format != new_frame.format()
+                        || existing_rescaler.input().width != new_frame.width()
+                        || existing_rescaler.input().height != new_frame.height()
+                });
 
                 if rebuild_rescaler {
                     to_rgb_rescaler = Some(rgb_rescaler_for_frame(new_frame));
