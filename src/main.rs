@@ -7,6 +7,7 @@ mod player;
 const VIDEO_URL: &str = "rtmp://127.0.0.1:1935/live/predict";
 
 fn main() -> anyhow::Result<()> {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn,icu_provider=off,i_slint_core=off")).init();
     ffmpeg_next::init()?;
 
     let app = App::new()?;
@@ -14,7 +15,57 @@ fn main() -> anyhow::Result<()> {
     let url = std::path::PathBuf::from(VIDEO_URL);
     let mut to_rgb_rescaler: Option<Rescaler> = None;
 
-    let mut player = player::Player::start(
+    let logs_model = std::rc::Rc::new(slint::VecModel::default());
+    logs_model.push(LogMessage {
+        time: "2026-06-10 20:30:00".into(),
+        level: "INFO".into(),
+        message: "Edge node initialized successfully.".into(),
+    });
+    logs_model.push(LogMessage {
+        time: "2026-06-10 20:35:12".into(),
+        level: "WARN".into(),
+        message: "High latency detected on stream.".into(),
+    });
+    app.set_logs(logs_model.clone().into());
+
+    let app_weak_for_error = app.as_weak();
+
+    let sysinfo_timer = slint::Timer::default();
+    let sysinfo_app_weak = app.as_weak();
+    let system = std::rc::Rc::new(std::cell::RefCell::new(sysinfo::System::new_all()));
+    let networks = std::rc::Rc::new(std::cell::RefCell::new(sysinfo::Networks::new_with_refreshed_list()));
+
+    sysinfo_timer.start(slint::TimerMode::Repeated, std::time::Duration::from_secs(1), move || {
+        if let Some(app) = sysinfo_app_weak.upgrade() {
+            let mut sys = system.borrow_mut();
+            sys.refresh_cpu_usage();
+            sys.refresh_memory();
+
+            let mut nets = networks.borrow_mut();
+            nets.refresh(true);
+
+            let cpu_usage = sys.global_cpu_usage();
+            app.set_cpu_usage(format!("{:.1}%", cpu_usage).into());
+
+            let mem_used_mb = sys.used_memory() / 1024 / 1024;
+            app.set_mem_usage(format!("{}MB", mem_used_mb).into());
+
+            let mut total_rx: u64 = 0;
+            let mut total_tx: u64 = 0;
+            for (_name, data) in nets.iter() {
+                total_rx += data.received();
+                total_tx += data.transmitted();
+            }
+            let total_bps = (total_rx + total_tx) * 8;
+            let total_mbps = total_bps as f64 / 1_000_000.0;
+            app.set_net_usage(format!("{:.1}Mbps", total_mbps).into());
+
+            let time_str = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+            app.set_system_time(time_str.into());
+        }
+    });
+
+    let _player = player::Player::start(
         url.into(),
         {
             let app_weak = app.as_weak();
@@ -37,29 +88,35 @@ fn main() -> anyhow::Result<()> {
 
                 let pixel_buffer = video_frame_to_pixel_buffer(&rgb_frame);
 
+                let width = new_frame.width();
+                let height = new_frame.height();
                 app_weak
                     .upgrade_in_event_loop(move |app| {
                         app.set_video_frame(slint::Image::from_rgb8(pixel_buffer));
+                        app.set_video_resolution(format!("{}x{}", width, height).into());
                     })
                     .unwrap();
             }
         },
-        {
-            let app_weak = app.as_weak();
-
-            move |playing| {
-                app_weak
-                    .upgrade_in_event_loop(move |app| {
-                        app.set_playing(playing);
-                    })
-                    .unwrap();
-            }
-        },
+        move |err_msg| {
+            app_weak_for_error.upgrade_in_event_loop(move |app| {
+                use slint::Model;
+                app.set_stream_error(err_msg.clone().into());
+                let time_str = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+                
+                let current_logs = app.get_logs();
+                let mut logs_vec: Vec<LogMessage> = current_logs.iter().collect();
+                logs_vec.insert(0, LogMessage {
+                    time: time_str.into(),
+                    level: "ERROR".into(),
+                    message: err_msg.into(),
+                });
+                
+                let new_model = std::rc::Rc::new(slint::VecModel::from(logs_vec));
+                app.set_logs(new_model.into());
+            }).unwrap();
+        }
     )?;
-
-    app.on_toggle_pause_play(move || {
-        player.toggle_pause_playing();
-    });
 
     app.run()?;
 

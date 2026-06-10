@@ -1,0 +1,56 @@
+import { HorizontalBox } from "std-widgets.slint";
+import { UText } from "../sleek-ui/widgets.slint";
+
+export component TopBar inherits HorizontalBox {
+    in property <string> system-time;
+    in property <string> stream-error;
+    in property <string> video-url;
+
+    padding: 0px;
+    alignment: space-between;
+
+    HorizontalBox {
+        spacing: 12px;
+        padding: 0px;
+        alignment: start;
+
+        UText {
+            text: "智能监控终端";
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+        }
+    }
+
+    HorizontalBox {
+        spacing: 24px;
+        padding: 0px;
+        alignment: center;
+
+        HorizontalBox {
+            spacing: 8px;
+            padding: 0px;
+            Rectangle {
+                width: 10px;
+                height: 10px;
+                border-radius: 5px;
+                background: root.stream-error == "" ? #52c41a : #ff4d4f;
+            }
+
+            UText {
+                text: root.stream-error == "" ? "已连接" : "连接异常";
+                color: #ffffff;
+            }
+        }
+
+        UText {
+            text: root.video-url;
+            color: #888888;
+        }
+    }
+
+    UText {
+        text: root.system-time;
+        color: #bbbbbb;
+    }
+}

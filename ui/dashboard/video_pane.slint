@@ -1,0 +1,112 @@
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { UCard, UText, UIcon } from "../sleek-ui/widgets.slint";
+
+export component VideoPane inherits VerticalBox {
+    in property <image> video-frame;
+    in property <string> video-resolution;
+    in property <string> video-fps;
+    in property <string> video-codec;
+    in property <string> video-latency;
+    in property <string> stream-error;
+    in property <string> video-url;
+
+    padding: 0px;
+    spacing: 16px;
+    horizontal-stretch: 1;
+
+    // Video Display
+    Rectangle {
+        border-width: 1px;
+        border-color: #333333;
+        border-radius: 4px;
+        background: #000000;
+        vertical-stretch: 1;
+
+        Image {
+            width: 100%;
+            height: 100%;
+            image-fit: contain;
+            source: root.video-frame;
+        }
+    }
+
+    // Video Meta Info
+    HorizontalBox {
+        padding: 0px;
+        spacing: 24px;
+        alignment: start;
+
+        UText {
+            text: "分辨率: " + root.video-resolution;
+            color: #bbbbbb;
+        }
+
+        UText {
+            text: "FPS: " + root.video-fps;
+            color: #bbbbbb;
+        }
+
+        UText {
+            text: "编码: " + root.video-codec;
+            color: #bbbbbb;
+        }
+
+        HorizontalBox {
+            alignment: end;
+            horizontal-stretch: 1;
+            padding: 0px;
+            UText {
+                text: "延迟: " + root.video-latency;
+                color: #52c41a;
+            }
+        }
+    }
+
+    // Video Status Card
+    UCard {
+        background: #2a2a2a;
+
+        HorizontalBox {
+            spacing: 16px;
+            padding: 16px;
+            alignment: start;
+
+            Rectangle {
+                width: 48px;
+                height: 48px;
+                border-radius: 24px;
+                background: root.stream-error == "" ? #52c41a : #ff4d4f;
+                UIcon {
+                    source: root.stream-error == "" ? @image-url("../sleek-ui/assets/icons/check.svg") : @image-url("../sleek-ui/assets/icons/x.svg");
+                    colorize: white;
+                    size: 24px;
+                }
+            }
+
+            VerticalBox {
+                spacing: 4px;
+                padding: 0px;
+                alignment: center;
+
+                UText {
+                    text: "视频状态";
+                    font-weight: 700;
+                    font-size: 16px;
+                    color: white;
+                }
+
+                UText {
+                    text: "流媒体: " + root.video-url;
+                    color: #888888;
+                    overflow: elide;
+                }
+
+                UText {
+                    text: root.stream-error == "" ? "状态: 正常" : "状态: 异常 (" + root.stream-error + ")";
+                    color: #888888;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}

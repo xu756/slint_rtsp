@@ -14,6 +14,10 @@ cpal = "0.15.3"
 ringbuf = "0.3.3"
 bytemuck = "1.23.1"
 derive_more = { version = "2.0.1", features = ["deref", "deref_mut"] }
+chrono = "0.4.45"
+sysinfo = "0.38.4"
+env_logger = "0.11.10"
+log = "0.4.32"
 
 [build-dependencies]
 slint-build = "1.16.1"

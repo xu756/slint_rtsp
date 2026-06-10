@@ -1,12 +1,7 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: MIT
 
-use futures::{FutureExt, future::OptionFuture};
-
-use super::ControlCommand;
-
 pub struct VideoPlaybackThread {
-    control_sender: smol::channel::Sender<ControlCommand>,
     packet_sender: smol::channel::Sender<ffmpeg_next::codec::packet::packet::Packet>,
     receiver_thread: Option<std::thread::JoinHandle<()>>,
 }
@@ -16,8 +11,6 @@ impl VideoPlaybackThread {
         stream: &ffmpeg_next::format::stream::Stream,
         mut video_frame_callback: Box<dyn FnMut(&ffmpeg_next::util::frame::Video) + Send>,
     ) -> Result<Self, anyhow::Error> {
-        let (control_sender, control_receiver) = smol::channel::unbounded();
-
         let (packet_sender, packet_receiver) =
             smol::channel::bounded::<ffmpeg_next::codec::packet::packet::Packet>(128);
 
@@ -29,75 +22,44 @@ impl VideoPlaybackThread {
         let receiver_thread =
             std::thread::Builder::new().name("video playback thread".into()).spawn(move || {
                 smol::block_on(async move {
-                    let packet_receiver_impl = async {
-                        let mut waiting_for_key_frame = true;
+                    let mut waiting_for_key_frame = true;
 
-                        loop {
-                            let Ok(packet) = packet_receiver.recv().await else { break };
+                    loop {
+                        let Ok(packet) = packet_receiver.recv().await else { break };
 
-                            smol::future::yield_now().await;
+                        smol::future::yield_now().await;
 
-                            if packet.is_corrupt() {
+                        if packet.is_corrupt() {
+                            continue;
+                        }
+
+                        if waiting_for_key_frame {
+                            if !packet.is_key() {
                                 continue;
                             }
 
-                            if waiting_for_key_frame {
-                                if !packet.is_key() {
-                                    continue;
-                                }
-
-                                waiting_for_key_frame = false;
-                                clock.reset();
-                            }
-
-                            packet_decoder.send_packet(&packet).unwrap();
-
-                            let mut decoded_frame = ffmpeg_next::util::frame::Video::empty();
-
-                            while packet_decoder.receive_frame(&mut decoded_frame).is_ok() {
-                                if let Some(delay) =
-                                    clock.convert_pts_to_instant(decoded_frame.pts())
-                                {
-                                    smol::Timer::after(delay).await;
-                                }
-
-                                video_frame_callback(&decoded_frame);
-                            }
+                            waiting_for_key_frame = false;
+                            clock.reset();
                         }
-                    }
-                    .fuse()
-                    .shared();
 
-                    let mut playing = true;
+                        packet_decoder.send_packet(&packet).unwrap();
 
-                    loop {
-                        let packet_receiver: OptionFuture<_> =
-                            if playing { Some(packet_receiver_impl.clone()) } else { None }.into();
+                        let mut decoded_frame = ffmpeg_next::util::frame::Video::empty();
 
-                        smol::pin!(packet_receiver);
-
-                        futures::select! {
-                            _ = packet_receiver => {},
-                            received_command = control_receiver.recv().fuse() => {
-                                match received_command {
-                                    Ok(ControlCommand::Pause) => {
-                                        playing = false;
-                                    }
-                                    Ok(ControlCommand::Play) => {
-                                        playing = true;
-                                    }
-                                    Err(_) => {
-                                        // Channel closed -> quit
-                                        return;
-                                    }
-                                }
+                        while packet_decoder.receive_frame(&mut decoded_frame).is_ok() {
+                            if let Some(delay) =
+                                clock.convert_pts_to_instant(decoded_frame.pts())
+                            {
+                                smol::Timer::after(delay).await;
                             }
+
+                            video_frame_callback(&decoded_frame);
                         }
                     }
                 })
             })?;
 
-        Ok(Self { control_sender, packet_sender, receiver_thread: Some(receiver_thread) })
+        Ok(Self { packet_sender, receiver_thread: Some(receiver_thread) })
     }
 
     pub async fn receive_packet(&self, packet: ffmpeg_next::codec::packet::packet::Packet) -> bool {
@@ -106,15 +68,10 @@ impl VideoPlaybackThread {
             Err(smol::channel::SendError(_)) => false,
         }
     }
-
-    pub async fn send_control_message(&self, message: ControlCommand) {
-        self.control_sender.send(message).await.unwrap();
-    }
 }
 
 impl Drop for VideoPlaybackThread {
     fn drop(&mut self) {
-        self.control_sender.close();
         if let Some(receiver_join_handle) = self.receiver_thread.take() {
             receiver_join_handle.join().unwrap();
         }

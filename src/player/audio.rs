@@ -8,24 +8,17 @@ use bytemuck::Pod;
 use cpal::SizedSample;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
-use futures::FutureExt;
-use futures::future::OptionFuture;
 use ringbuf::HeapRb;
 use ringbuf::ring_buffer::{RbRef, RbWrite};
 use std::future::Future;
 
-use super::ControlCommand;
-
 pub struct AudioPlaybackThread {
-    control_sender: smol::channel::Sender<ControlCommand>,
     packet_sender: smol::channel::Sender<ffmpeg_next::codec::packet::packet::Packet>,
     receiver_thread: Option<std::thread::JoinHandle<()>>,
 }
 
 impl AudioPlaybackThread {
     pub fn start(stream: &ffmpeg_next::format::stream::Stream) -> Result<Self, anyhow::Error> {
-        let (control_sender, control_receiver) = smol::channel::unbounded();
-
         let (packet_sender, packet_receiver) = smol::channel::bounded(128);
 
         let decoder_context = ffmpeg_next::codec::Context::from_parameters(stream.parameters())?;
@@ -99,39 +92,11 @@ impl AudioPlaybackThread {
                         format => todo!("unsupported cpal output format {:#?}", format),
                     };
 
-                    let packet_receiver_impl =
-                        async { ffmpeg_to_cpal_forwarder.stream().await }.fuse().shared();
-
-                    let mut playing = true;
-
-                    loop {
-                        let packet_receiver: OptionFuture<_> =
-                            if playing { Some(packet_receiver_impl.clone()) } else { None }.into();
-
-                        smol::pin!(packet_receiver);
-
-                        futures::select! {
-                            _ = packet_receiver => {},
-                            received_command = control_receiver.recv().fuse() => {
-                                match received_command {
-                                    Ok(ControlCommand::Pause) => {
-                                        playing = false;
-                                    }
-                                    Ok(ControlCommand::Play) => {
-                                        playing = true;
-                                    }
-                                    Err(_) => {
-                                        // Channel closed -> quit
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    ffmpeg_to_cpal_forwarder.stream().await;
                 })
             })?;
 
-        Ok(Self { control_sender, packet_sender, receiver_thread: Some(receiver_thread) })
+        Ok(Self { packet_sender, receiver_thread: Some(receiver_thread) })
     }
 
     pub async fn receive_packet(&self, packet: ffmpeg_next::codec::packet::packet::Packet) -> bool {
@@ -140,15 +105,10 @@ impl AudioPlaybackThread {
             Err(smol::channel::SendError(_)) => false,
         }
     }
-
-    pub async fn send_control_message(&self, message: ControlCommand) {
-        self.control_sender.send(message).await.unwrap();
-    }
 }
 
 impl Drop for AudioPlaybackThread {
     fn drop(&mut self) {
-        self.control_sender.close();
         if let Some(receiver_join_handle) = self.receiver_thread.take() {
             receiver_join_handle.join().unwrap();
         }

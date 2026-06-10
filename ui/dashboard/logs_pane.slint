@@ -1,0 +1,134 @@
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { UCard, UText, UDivider, UScrollView, UTag, UTagPreset, UTabs, USelect } from "../sleek-ui/widgets.slint";
+import { UOptionData } from "../sleek-ui/structs/data-structs.slint";
+import { LogMessage, AlarmMessage } from "structs.slint";
+
+export component LogsPane inherits VerticalBox {
+    in property <[LogMessage]> logs;
+    in property <[AlarmMessage]> alarms;
+    in property <int> alarm-count;
+
+    width: 380px;
+    padding: 0px;
+    spacing: 16px;
+
+    UCard {
+        background: #2a2a2a;
+        vertical-stretch: 1;
+
+        VerticalBox {
+            padding: 16px;
+            spacing: 12px;
+
+            HorizontalBox {
+                padding: 0px;
+                alignment: space-between;
+
+                tabs := UTabs {
+                    tabs: ["日志", "报警 (" + root.alarm-count + ")"];
+                    current-index: 0;
+                }
+
+                USelect {
+                    options: [
+                        { text: "级别: 全部", value: "all", enabled: true },
+                        { text: "级别: 高危", value: "high", enabled: true },
+                        { text: "级别: 中危", value: "mid", enabled: true },
+                        { text: "级别: 低危", value: "low", enabled: true }
+                    ];
+                    current-index: 0;
+                }
+            }
+
+            UDivider {
+                background: #444444;
+            }
+
+            if tabs.current-index == 0: UScrollView {
+                VerticalBox {
+                    padding: 0px;
+                    spacing: 12px;
+                    alignment: start;
+                    for log in logs: HorizontalBox {
+                        spacing: 12px;
+                        padding: 0px;
+
+                        UText {
+                            text: log.time;
+                            color: #888888;
+                            width: 60px;
+                        }
+
+                        UText {
+                            text: log.level;
+                            color: log.level == "ERROR" ? #ff4d4f :
+                                log.level == "WARN" ? #faad14 :
+                                log.level == "DEBUG" ? #1890ff :
+                                #52c41a; // INFO
+                            width: 50px;
+                        }
+
+                        UText {
+                            text: log.message;
+                            color: #bbbbbb;
+                            horizontal-stretch: 1;
+                            overflow: elide; // Prevents the ICU segmentation error by not using word-wrap
+                        }
+                    }
+                }
+            }
+
+            if tabs.current-index == 1: UScrollView {
+                VerticalBox {
+                    padding: 0px;
+                    spacing: 12px;
+                    alignment: start;
+                    for alarm in alarms: HorizontalBox {
+                        spacing: 12px;
+                        padding: 0px;
+
+                        UText {
+                            text: alarm.time;
+                            color: #888888;
+                            width: 60px;
+                            vertical-alignment: center;
+                        }
+
+                        UTag {
+                            text: alarm.level;
+                            preset: alarm.level == "高危" ? UTagPreset.red :
+                                alarm.level == "中危" ? UTagPreset.orange :
+                                UTagPreset.blue; // 低危
+                        }
+
+                        UText {
+                            text: alarm.message;
+                            color: #bbbbbb;
+                            horizontal-stretch: 1;
+                            vertical-alignment: center;
+                            overflow: elide; // Prevents the ICU segmentation error
+                        }
+
+                        HorizontalBox {
+                            spacing: 6px;
+                            padding: 0px;
+                            alignment: end;
+
+                            Rectangle {
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 4px;
+                                background: alarm.status == "未处理" ? #ff4d4f : #1890ff;
+                            }
+
+                            UText {
+                                text: alarm.status;
+                                color: #bbbbbb;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

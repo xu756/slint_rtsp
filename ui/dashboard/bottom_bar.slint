@@ -1,0 +1,43 @@
+import { HorizontalBox } from "std-widgets.slint";
+import { UText } from "../sleek-ui/widgets.slint";
+
+export component BottomBar inherits HorizontalBox {
+    in property <string> cpu-usage;
+    in property <string> mem-usage;
+    in property <string> net-usage;
+
+    padding: 0px;
+    alignment: space-between;
+
+    HorizontalBox {
+        spacing: 8px;
+        padding: 0px;
+        alignment: start;
+
+        UText {
+            text: "⚙ 设置";
+            color: #888888;
+        }
+    }
+
+    HorizontalBox {
+        spacing: 24px;
+        padding: 0px;
+        alignment: end;
+
+        UText {
+            text: "CPU: " + root.cpu-usage;
+            color: #888888;
+        }
+
+        UText {
+            text: "内存: " + root.mem-usage;
+            color: #888888;
+        }
+
+        UText {
+            text: "网络: " + root.net-usage;
+            color: #888888;
+        }
+    }
+}
