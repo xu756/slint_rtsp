@@ -17,7 +17,7 @@ export component VideoPane inherits VerticalBox {
     // Video Display
     Rectangle {
         border-width: 1px;
-        border-color: #333333;
+        border-color: #d9d9d9;
         border-radius: 4px;
         background: #000000;
         vertical-stretch: 1;
@@ -38,12 +38,12 @@ export component VideoPane inherits VerticalBox {
 
         UText {
             text: "分辨率: " + root.video-resolution;
-            color: #bbbbbb;
+            color: #666666;
         }
 
         UText {
             text: "FPS: " + root.video-fps;
-            color: #bbbbbb;
+            color: #666666;
         }
 
         UText {
@@ -64,7 +64,7 @@ export component VideoPane inherits VerticalBox {
 
     // Video Status Card
     UCard {
-        background: #2a2a2a;
+        background: #ffffff;
 
         HorizontalBox {
             spacing: 16px;
@@ -92,19 +92,19 @@ export component VideoPane inherits VerticalBox {
                     text: "视频状态";
                     font-weight: 700;
                     font-size: 16px;
-                    color: white;
+                    color: #333333;
                 }
 
                 UText {
                     text: "流媒体: " + root.video-url;
-                    color: #888888;
-                    overflow: elide;
+                    color: #666666;
+                    overflow: clip;
                 }
 
                 UText {
                     text: root.stream-error == "" ? "状态: 正常" : "状态: 异常 (" + root.stream-error + ")";
-                    color: #888888;
-                    overflow: elide;
+                    color: #666666;
+                    overflow: clip;
                 }
             }
         }

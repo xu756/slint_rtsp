@@ -18,7 +18,7 @@ export component TopBar inherits HorizontalBox {
             text: "智能监控终端";
             font-size: 16px;
             font-weight: 700;
-            color: white;
+            color: #333333;
         }
     }
 
@@ -39,18 +39,18 @@ export component TopBar inherits HorizontalBox {
 
             UText {
                 text: root.stream-error == "" ? "已连接" : "连接异常";
-                color: #ffffff;
+                color: #333333;
             }
         }
 
         UText {
             text: root.video-url;
-            color: #888888;
+            color: #666666;
         }
     }
 
     UText {
         text: root.system-time;
-        color: #bbbbbb;
+        color: #666666;
     }
 }

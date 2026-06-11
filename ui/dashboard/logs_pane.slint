@@ -13,7 +13,7 @@ export component LogsPane inherits VerticalBox {
     spacing: 16px;
 
     UCard {
-        background: #2a2a2a;
+        background: #ffffff;
         vertical-stretch: 1;
 
         VerticalBox {
@@ -41,10 +41,11 @@ export component LogsPane inherits VerticalBox {
             }
 
             UDivider {
-                background: #444444;
+                background: #e8e8e8;
             }
 
             if tabs.current-index == 0: UScrollView {
+                vertical-stretch: 1;
                 VerticalBox {
                     padding: 0px;
                     spacing: 12px;
@@ -55,7 +56,7 @@ export component LogsPane inherits VerticalBox {
 
                         UText {
                             text: log.time;
-                            color: #888888;
+                            color: #999999;
                             width: 60px;
                         }
 
@@ -70,15 +71,16 @@ export component LogsPane inherits VerticalBox {
 
                         UText {
                             text: log.message;
-                            color: #bbbbbb;
+                            color: #333333;
                             horizontal-stretch: 1;
-                            overflow: elide; // Prevents the ICU segmentation error by not using word-wrap
+                            overflow: clip;
                         }
                     }
                 }
             }
 
             if tabs.current-index == 1: UScrollView {
+                vertical-stretch: 1;
                 VerticalBox {
                     padding: 0px;
                     spacing: 12px;
@@ -89,7 +91,7 @@ export component LogsPane inherits VerticalBox {
 
                         UText {
                             text: alarm.time;
-                            color: #888888;
+                            color: #999999;
                             width: 60px;
                             vertical-alignment: center;
                         }
@@ -103,10 +105,10 @@ export component LogsPane inherits VerticalBox {
 
                         UText {
                             text: alarm.message;
-                            color: #bbbbbb;
+                            color: #333333;
                             horizontal-stretch: 1;
                             vertical-alignment: center;
-                            overflow: elide; // Prevents the ICU segmentation error
+                            overflow: clip;
                         }
 
                         HorizontalBox {
@@ -123,7 +125,7 @@ export component LogsPane inherits VerticalBox {
 
                             UText {
                                 text: alarm.status;
-                                color: #bbbbbb;
+                                color: #333333;
                             }
                         }
                     }

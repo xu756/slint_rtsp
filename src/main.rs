@@ -6,8 +6,35 @@ mod player;
 
 const VIDEO_URL: &str = "rtmp://127.0.0.1:1935/live/predict";
 
+fn filter_stderr() {
+    use std::os::unix::io::FromRawFd;
+    use std::io::Write;
+    
+    unsafe {
+        let original_stderr = libc::dup(libc::STDERR_FILENO);
+        let mut pipe_fds = [0; 2];
+        libc::pipe(pipe_fds.as_mut_ptr());
+        libc::dup2(pipe_fds[1], libc::STDERR_FILENO);
+        libc::close(pipe_fds[1]);
+        
+        std::thread::spawn(move || {
+            let pipe_read = std::fs::File::from_raw_fd(pipe_fds[0]);
+            let mut original_stderr_file = std::fs::File::from_raw_fd(original_stderr);
+            use std::io::BufRead;
+            let reader = std::io::BufReader::new(pipe_read);
+            for line in reader.lines() {
+                if let Ok(l) = line {
+                    if !l.contains("ICU4X data error") {
+                        let _ = writeln!(original_stderr_file, "{}", l);
+                    }
+                }
+            }
+        });
+    }
+}
+
 fn main() -> anyhow::Result<()> {
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn,icu_provider=off,i_slint_core=off")).init();
+    filter_stderr();
     ffmpeg_next::init()?;
 
     let app = App::new()?;

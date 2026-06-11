@@ -4588,6 +4588,7 @@ dependencies = [
  "env_logger",
  "ffmpeg-next",
  "futures",
+ "libc",
  "log",
  "ringbuf",
  "slint",

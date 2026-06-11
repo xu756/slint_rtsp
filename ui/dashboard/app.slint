@@ -7,7 +7,6 @@ import { VideoPane } from "video_pane.slint";
 import { LogsPane } from "logs_pane.slint";
 
 export { LogMessage, AlarmMessage }
-
 export component App inherits Window {
     in property <image> video-frame <=> video-pane.video-frame;
     in property <string> stream-error;
@@ -50,10 +49,10 @@ export component App inherits Window {
     min-width: 1024px;
     min-height: 600px;
     title: "智能监控终端";
-    background: #1e1e1e;
+    background: #f0f2f5;
 
     init => {
-        Palette.color-scheme = ColorScheme.dark;
+        Palette.color-scheme = ColorScheme.light;
     }
 
     VerticalBox {
