@@ -1,5 +1,14 @@
 import { VerticalBox, HorizontalBox } from "std-widgets.slint";
-import { UCard, UText, UDivider, UScrollView, UTag, UTagPreset, UTabs, USelect } from "../sleek-ui/widgets.slint";
+import {
+    UCard,
+    UText,
+    UDivider,
+    UScrollView,
+    UTag,
+    UTagPreset,
+    UTabs,
+    USelect,
+} from "../sleek-ui/widgets.slint";
 import { UOptionData } from "../sleek-ui/structs/data-structs.slint";
 import { LogMessage, AlarmMessage } from "structs.slint";
 
@@ -7,7 +16,7 @@ export component LogsPane inherits VerticalBox {
     in property <[LogMessage]> logs;
     in property <[AlarmMessage]> alarms;
     in property <int> alarm-count;
-
+    in property <int> log-count;
     width: 380px;
     padding: 0px;
     spacing: 16px;
@@ -19,13 +28,14 @@ export component LogsPane inherits VerticalBox {
         VerticalBox {
             padding: 16px;
             spacing: 12px;
+            alignment: start;
 
             HorizontalBox {
                 padding: 0px;
                 alignment: space-between;
 
                 tabs := UTabs {
-                    tabs: ["日志", "报警 (" + root.alarm-count + ")"];
+                    tabs: ["日志 (" + root.log-count + ")", "报警 (" + root.alarm-count + ")"];
                     current-index: 0;
                 }
 
@@ -49,7 +59,6 @@ export component LogsPane inherits VerticalBox {
                 VerticalBox {
                     padding: 0px;
                     spacing: 12px;
-                    alignment: start;
                     for log in logs: HorizontalBox {
                         spacing: 12px;
                         padding: 0px;
@@ -76,6 +85,9 @@ export component LogsPane inherits VerticalBox {
                             overflow: clip;
                         }
                     }
+                    Rectangle {
+                        vertical-stretch: 1;
+                    }
                 }
             }
 
@@ -84,7 +96,6 @@ export component LogsPane inherits VerticalBox {
                 VerticalBox {
                     padding: 0px;
                     spacing: 12px;
-                    alignment: start;
                     for alarm in alarms: HorizontalBox {
                         spacing: 12px;
                         padding: 0px;
@@ -128,6 +139,9 @@ export component LogsPane inherits VerticalBox {
                                 color: #333333;
                             }
                         }
+                    }
+                    Rectangle {
+                        vertical-stretch: 1;
                     }
                 }
             }

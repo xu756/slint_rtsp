@@ -23,8 +23,49 @@ export component App inherits Window {
     in property <string> video-url: "rtsp://192.168.1.123:8554/mystream";
     default-font-family: "DingTalk JinBuTi";
     in property <int> alarm-count: 12;
+    in property <int> log-count: 120;
 
     in property <[LogMessage]> logs: [
+        { time: "16:47:58", level: "INFO", message: "已连接到流媒体服务器" },
+        { time: "16:47:59", level: "INFO", message: "开始接收视频流" },
+        { time: "16:48:00", level: "DEBUG", message: "视频解码器初始化成功" },
+        { time: "16:48:00", level: "INFO", message: "视频分辨率: 1920x1080" },
+        { time: "16:48:00", level: "INFO", message: "FPS: 30" },
+        { time: "16:48:01", level: "INFO", message: "音频流: 未检测到" },
+        { time: "16:48:05", level: "WARN", message: "网络延迟较高: 120ms" },
+        { time: "16:48:10", level: "INFO", message: "帧率稳定" },
+        { time: "16:47:58", level: "INFO", message: "已连接到流媒体服务器" },
+        { time: "16:47:59", level: "INFO", message: "开始接收视频流" },
+        { time: "16:48:00", level: "DEBUG", message: "视频解码器初始化成功" },
+        { time: "16:48:00", level: "INFO", message: "视频分辨率: 1920x1080" },
+        { time: "16:48:00", level: "INFO", message: "FPS: 30" },
+        { time: "16:48:01", level: "INFO", message: "音频流: 未检测到" },
+        { time: "16:48:05", level: "WARN", message: "网络延迟较高: 120ms" },
+        { time: "16:48:10", level: "INFO", message: "帧率稳定" },
+        { time: "16:47:58", level: "INFO", message: "已连接到流媒体服务器" },
+        { time: "16:47:59", level: "INFO", message: "开始接收视频流" },
+        { time: "16:48:00", level: "DEBUG", message: "视频解码器初始化成功" },
+        { time: "16:48:00", level: "INFO", message: "视频分辨率: 1920x1080" },
+        { time: "16:48:00", level: "INFO", message: "FPS: 30" },
+        { time: "16:48:01", level: "INFO", message: "音频流: 未检测到" },
+        { time: "16:48:05", level: "WARN", message: "网络延迟较高: 120ms" },
+        { time: "16:48:10", level: "INFO", message: "帧率稳定" },
+        { time: "16:47:58", level: "INFO", message: "已连接到流媒体服务器" },
+        { time: "16:47:59", level: "INFO", message: "开始接收视频流" },
+        { time: "16:48:00", level: "DEBUG", message: "视频解码器初始化成功" },
+        { time: "16:48:00", level: "INFO", message: "视频分辨率: 1920x1080" },
+        { time: "16:48:00", level: "INFO", message: "FPS: 30" },
+        { time: "16:48:01", level: "INFO", message: "音频流: 未检测到" },
+        { time: "16:48:05", level: "WARN", message: "网络延迟较高: 120ms" },
+        { time: "16:48:10", level: "INFO", message: "帧率稳定" },
+        { time: "16:47:58", level: "INFO", message: "已连接到流媒体服务器" },
+        { time: "16:47:59", level: "INFO", message: "开始接收视频流" },
+        { time: "16:48:00", level: "DEBUG", message: "视频解码器初始化成功" },
+        { time: "16:48:00", level: "INFO", message: "视频分辨率: 1920x1080" },
+        { time: "16:48:00", level: "INFO", message: "FPS: 30" },
+        { time: "16:48:01", level: "INFO", message: "音频流: 未检测到" },
+        { time: "16:48:05", level: "WARN", message: "网络延迟较高: 120ms" },
+        { time: "16:48:10", level: "INFO", message: "帧率稳定" },
         { time: "16:47:58", level: "INFO", message: "已连接到流媒体服务器" },
         { time: "16:47:59", level: "INFO", message: "开始接收视频流" },
         { time: "16:48:00", level: "DEBUG", message: "视频解码器初始化成功" },
@@ -80,6 +121,7 @@ export component App inherits Window {
 
             LogsPane {
                 logs: root.logs;
+                log-count: root.log-count;
                 alarms: root.alarms;
                 alarm-count: root.alarm-count;
             }
