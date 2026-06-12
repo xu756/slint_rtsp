@@ -128,15 +128,20 @@ export component LogsPane inherits VerticalBox {
                             alignment: end;
 
                             Rectangle {
-                                width: 8px;
-                                height: 8px;
-                                border-radius: 4px;
-                                background: alarm.status == "未处理" ? #ff4d4f : #1890ff;
+                                background: transparent;
+
+                                Rectangle {
+                                    width: 8px;
+                                    height: 8px;
+                                    border-radius: 4px;
+                                    background: alarm.status == "未处理" ? #ff4d4f : #1890ff;
+                                }
                             }
 
                             UText {
                                 text: alarm.status;
                                 color: #333333;
+                                vertical-alignment: center;
                             }
                         }
                     }
