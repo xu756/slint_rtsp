@@ -8,24 +8,38 @@ import {
     UTagPreset,
     UTabs,
     USelect,
+    UModal,
+    UModalLogic,
 } from "../sleek-ui/widgets.slint";
+import { STag } from "../surrealism-ui/src/tag/index.slint";
+import { Themes } from "../surrealism-ui/use/src/theme.slint";
 import { UOptionData } from "../sleek-ui/structs/data-structs.slint";
 import { LogMessage, AlarmMessage } from "structs.slint";
 
-export component LogsPane inherits VerticalBox {
+export component LogsPane inherits Rectangle {
     in property <[LogMessage]> logs;
     in property <[AlarmMessage]> alarms;
     in property <int> alarm-count;
     in property <int> log-count;
+    private property <string> detail-kind: "日志";
+    private property <string> detail-time;
+    private property <string> detail-level;
+    private property <string> detail-title;
+    private property <string> detail-status;
+    private property <string> detail-text;
+    private property <string> detail-image-url;
+    private property <image> detail-snapshot: @image-url("");
     width: 380px;
-    padding: 0px;
-    spacing: 16px;
+    vertical-stretch: 1;
 
     UCard {
+        width: root.width;
+        height: root.height;
         background: #ffffff;
-        vertical-stretch: 1;
 
         VerticalBox {
+            width: 100%;
+            height: 100%;
             padding: 16px;
             spacing: 12px;
             alignment: start;
@@ -58,31 +72,65 @@ export component LogsPane inherits VerticalBox {
                 vertical-stretch: 1;
                 VerticalBox {
                     padding: 0px;
-                    spacing: 12px;
-                    for log in logs: HorizontalBox {
-                        spacing: 12px;
-                        padding: 0px;
+                    spacing: 6px;
+                    for log in logs: Rectangle {
+                        height: 36px;
+                        horizontal-stretch: 1;
+                        border-radius: 6px;
+                        background: log-touch.has-hover ? #f5f7fb : transparent;
 
-                        UText {
-                            text: log.time;
-                            color: #999999;
-                            width: 60px;
+                        log-touch := TouchArea {
+                            mouse-cursor: pointer;
+                            clicked => {
+                                root.detail-kind = "日志";
+                                root.detail-time = log.time;
+                                root.detail-level = log.level;
+                                root.detail-title = log.message;
+                                root.detail-status = "";
+                                root.detail-text = log.detail;
+                                root.detail-image-url = log.image_url;
+                                root.detail-snapshot = log.snapshot;
+                                UModalLogic.open-modal("message-detail");
+                            }
                         }
 
-                        UText {
-                            text: log.level;
-                            color: log.level == "ERROR" ? #ff4d4f :
-                                log.level == "WARN" ? #faad14 :
-                                log.level == "DEBUG" ? #1890ff :
-                                #52c41a; // INFO
-                            width: 50px;
-                        }
+                        HorizontalBox {
+                            height: 36px;
+                            width: 100%;
+                            spacing: 10px;
+                            padding-left: 6px;
+                            padding-right: 4px;
 
-                        UText {
-                            text: log.message;
-                            color: #333333;
-                            horizontal-stretch: 1;
-                            overflow: clip;
+                            UText {
+                                text: log.time;
+                                color: #999999;
+                                width: 60px;
+                                vertical-alignment: center;
+                            }
+
+                            UText {
+                                text: log.level;
+                                color: log.level == "ERROR" ? #ff4d4f :
+                                    log.level == "WARN" ? #faad14 :
+                                    log.level == "DEBUG" ? #1890ff :
+                                    #52c41a; // INFO
+                                width: 50px;
+                                vertical-alignment: center;
+                            }
+
+                            UText {
+                                text: log.message;
+                                color: #333333;
+                                horizontal-stretch: 1;
+                                vertical-alignment: center;
+                                overflow: clip;
+                            }
+
+                            STag {
+                                text: "详情";
+                                theme: Themes.Info;
+                                font-size: 11px;
+                            }
                         }
                     }
                     Rectangle {
@@ -95,53 +143,78 @@ export component LogsPane inherits VerticalBox {
                 vertical-stretch: 1;
                 VerticalBox {
                     padding: 0px;
-                    spacing: 12px;
-                    for alarm in alarms: HorizontalBox {
-                        spacing: 12px;
-                        padding: 0px;
+                    spacing: 6px;
+                    for alarm in alarms: Rectangle {
+                        height: 40px;
+                        horizontal-stretch: 1;
+                        border-radius: 6px;
+                        background: alarm-touch.has-hover ? #fff7f0 : transparent;
 
-                        UText {
-                            text: alarm.time;
-                            color: #999999;
-                            width: 60px;
-                            vertical-alignment: center;
-                        }
-
-                        UTag {
-                            text: alarm.level;
-                            preset: alarm.level == "高危" ? UTagPreset.red :
-                                alarm.level == "中危" ? UTagPreset.orange :
-                                UTagPreset.blue; // 低危
-                        }
-
-                        UText {
-                            text: alarm.message;
-                            color: #333333;
-                            horizontal-stretch: 1;
-                            vertical-alignment: center;
-                            overflow: clip;
+                        alarm-touch := TouchArea {
+                            mouse-cursor: pointer;
+                            clicked => {
+                                root.detail-kind = "报警";
+                                root.detail-time = alarm.time;
+                                root.detail-level = alarm.level;
+                                root.detail-title = alarm.message;
+                                root.detail-status = alarm.status;
+                                root.detail-text = alarm.detail;
+                                root.detail-image-url = alarm.image_url;
+                                root.detail-snapshot = alarm.snapshot;
+                                UModalLogic.open-modal("message-detail");
+                            }
                         }
 
                         HorizontalBox {
-                            spacing: 6px;
-                            padding: 0px;
-                            alignment: end;
+                            height: 40px;
+                            width: 100%;
+                            spacing: 10px;
+                            padding-left: 6px;
+                            padding-right: 4px;
 
-                            Rectangle {
-                                background: transparent;
+                            UText {
+                                text: alarm.time;
+                                color: #999999;
+                                width: 60px;
+                                vertical-alignment: center;
+                            }
 
-                                Rectangle {
-                                    width: 8px;
-                                    height: 8px;
-                                    border-radius: 4px;
-                                    background: alarm.status == "未处理" ? #ff4d4f : #1890ff;
-                                }
+                            UTag {
+                                text: alarm.level;
+                                preset: alarm.level == "高危" ? UTagPreset.red :
+                                    alarm.level == "中危" ? UTagPreset.orange :
+                                    UTagPreset.blue; // 低危
                             }
 
                             UText {
-                                text: alarm.status;
+                                text: alarm.message;
                                 color: #333333;
+                                horizontal-stretch: 1;
                                 vertical-alignment: center;
+                                overflow: clip;
+                            }
+
+                            HorizontalBox {
+                                spacing: 6px;
+                                padding: 0px;
+                                alignment: end;
+
+                                Rectangle {
+                                    background: transparent;
+
+                                    Rectangle {
+                                        width: 8px;
+                                        height: 8px;
+                                        border-radius: 4px;
+                                        background: alarm.status == "未处理" ? #ff4d4f : #1890ff;
+                                    }
+                                }
+
+                                UText {
+                                    text: alarm.status;
+                                    color: #333333;
+                                    vertical-alignment: center;
+                                }
                             }
                         }
                     }
@@ -149,6 +222,124 @@ export component LogsPane inherits VerticalBox {
                         vertical-stretch: 1;
                     }
                 }
+            }
+        }
+    }
+
+    UModal {
+        width: root.width;
+        height: root.height;
+        id: "message-detail";
+        title: root.detail-kind + "详情";
+        modal-min-width: 340px;
+        modal-max-width: 360px;
+        modal-max-height: 620px;
+        top-divider: true;
+        bottom-divider: true;
+        accept-btn-text: "关闭";
+        cancel-btn-toggle: false;
+
+        VerticalBox {
+            padding: 0px;
+            spacing: 12px;
+
+            if root.detail-snapshot.width > 0: Rectangle {
+                height: 180px;
+                border-radius: 8px;
+                clip: true;
+                background: #f5f7fb;
+
+                Image {
+                    width: 100%;
+                    height: 100%;
+                    source: root.detail-snapshot;
+                    image-fit: cover;
+                }
+            }
+
+            if root.detail-snapshot.width <= 0: Rectangle {
+                height: 112px;
+                border-radius: 8px;
+                background: #f5f7fb;
+                border-color: #e8e8e8;
+                border-width: 1px;
+
+                VerticalBox {
+                    padding: 14px;
+                    spacing: 6px;
+                    alignment: center;
+
+                    UText {
+                        text: "图片未加载";
+                        color: #666666;
+                        horizontal-alignment: center;
+                    }
+
+                    UText {
+                        text: root.detail-image-url;
+                        color: #999999;
+                        font-size: 11px;
+                        horizontal-alignment: center;
+                        wrap: word-wrap;
+                    }
+                }
+            }
+
+            HorizontalBox {
+                padding: 0px;
+                spacing: 8px;
+
+                UTag {
+                    text: root.detail-level;
+                    preset: root.detail-level == "ERROR" || root.detail-level == "高危" ? UTagPreset.red :
+                        root.detail-level == "WARN" || root.detail-level == "中危" ? UTagPreset.orange :
+                        root.detail-level == "DEBUG" ? UTagPreset.blue :
+                        UTagPreset.green;
+                }
+
+                if root.detail-status != "": UTag {
+                    text: root.detail-status;
+                    preset: root.detail-status == "未处理" ? UTagPreset.red : UTagPreset.blue;
+                }
+
+                UText {
+                    text: root.detail-time;
+                    color: #999999;
+                    vertical-alignment: center;
+                    horizontal-stretch: 1;
+                    horizontal-alignment: right;
+                }
+            }
+
+            UText {
+                text: root.detail-title;
+                color: #333333;
+                font-size: 16px;
+                font-weight: 700;
+                wrap: word-wrap;
+            }
+
+            UText {
+                text: root.detail-text;
+                color: #666666;
+                wrap: word-wrap;
+            }
+
+            UDivider {
+                background: #e8e8e8;
+            }
+
+            UText {
+                text: "图片地址";
+                color: #999999;
+                font-size: 12px;
+            }
+
+            UText {
+                text: root.detail-image-url;
+                color: #1890ff;
+                font-size: 12px;
+                wrap: word-wrap;
             }
         }
     }
