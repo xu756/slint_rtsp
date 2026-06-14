@@ -41,6 +41,9 @@ fn main() -> anyhow::Result<()> {
     ffmpeg_next::init()?;
 
     let app = App::new()?;
+    app.on_quit_requested(|| {
+        slint::quit_event_loop().unwrap();
+    });
 
     let url = std::path::PathBuf::from(VIDEO_URL);
     let mut to_rgb_rescaler: Option<Rescaler> = None;

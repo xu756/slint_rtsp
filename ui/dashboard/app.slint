@@ -8,6 +8,8 @@ import { LogsPane } from "logs_pane.slint";
 
 export { LogMessage, AlarmMessage }
 export component App inherits Window {
+    callback quit-requested();
+
     in property <image> video-frame <=> video-pane.video-frame;
     in property <string> stream-error;
 
@@ -101,6 +103,9 @@ export component App inherits Window {
             system-time: root.system-time;
             stream-error: root.stream-error;
             video-url: root.video-url;
+            close-requested => {
+                root.quit-requested();
+            }
         }
 
         HorizontalBox {

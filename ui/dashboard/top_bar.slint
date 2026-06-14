@@ -1,10 +1,11 @@
 import { HorizontalBox } from "std-widgets.slint";
-import { UText } from "../sleek-ui/widgets.slint";
+import { UIconButton, UText } from "../sleek-ui/widgets.slint";
 
 export component TopBar inherits HorizontalBox {
     in property <string> system-time;
     in property <string> stream-error;
     in property <string> video-url;
+    callback close-requested();
 
     padding: 0px;
     alignment: space-between;
@@ -59,9 +60,25 @@ export component TopBar inherits HorizontalBox {
         }
     }
 
-    UText {
-        text: root.system-time;
-        vertical-alignment: center;
-        color: #666666;
+    HorizontalBox {
+        spacing: 8px;
+        padding: 0px;
+        alignment: end;
+
+        UText {
+            text: root.system-time;
+            vertical-alignment: center;
+            color: #666666;
+        }
+
+        UIconButton {
+            variant: text;
+            danger: true;
+            icon: @image-url("../sleek-ui/assets/icons/x.svg");
+            accessible-label: "关闭程序";
+            clicked => {
+                root.close-requested();
+            }
+        }
     }
 }
