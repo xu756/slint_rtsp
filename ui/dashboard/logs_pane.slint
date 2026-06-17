@@ -7,20 +7,18 @@ import {
     UTag,
     UTagPreset,
     UTabs,
-    USelect,
     UModal,
     UModalLogic,
 } from "../sleek-ui/widgets.slint";
-import { STag } from "../surrealism-ui/src/tag/index.slint";
-import { Themes } from "../surrealism-ui/use/src/theme.slint";
-import { UOptionData } from "../sleek-ui/structs/data-structs.slint";
-import { LogMessage, AlarmMessage } from "structs.slint";
+import { LogMessage, AlarmMessage, FoodItem } from "structs.slint";
 
 export component LogsPane inherits Rectangle {
     in property <[LogMessage]> logs;
     in property <[AlarmMessage]> alarms;
+    in property <[FoodItem]> foods;
     in property <int> alarm-count;
     in property <int> log-count;
+    in property <int> food-count;
     private property <string> detail-kind: "日志";
     private property <string> detail-time;
     private property <string> detail-level;
@@ -49,17 +47,7 @@ export component LogsPane inherits Rectangle {
                 alignment: space-between;
 
                 tabs := UTabs {
-                    tabs: ["日志 (" + root.log-count + ")", "报警 (" + root.alarm-count + ")"];
-                    current-index: 0;
-                }
-
-                USelect {
-                    options: [
-                        { text: "级别: 全部", value: "all", enabled: true },
-                        { text: "级别: 高危", value: "high", enabled: true },
-                        { text: "级别: 中危", value: "mid", enabled: true },
-                        { text: "级别: 低危", value: "low", enabled: true }
-                    ];
+                    tabs: ["日志 (" + root.log-count + ")", "报警 (" + root.alarm-count + ")", "食材管理 (" + root.food-count + ")"];
                     current-index: 0;
                 }
             }
@@ -212,6 +200,107 @@ export component LogsPane inherits Rectangle {
                             }
                         }
                     }
+                    Rectangle {
+                        vertical-stretch: 1;
+                    }
+                }
+            }
+
+            if tabs.current-index == 2: UScrollView {
+                vertical-stretch: 1;
+                VerticalBox {
+                    padding: 0px;
+                    spacing: 8px;
+
+                    for food in foods: Rectangle {
+                        height: 86px;
+                        horizontal-stretch: 1;
+                        border-radius: 8px;
+                        background: food-touch.has-hover ? #f5f9ff : #ffffff;
+                        border-width: 1px;
+                        border-color: food.status == "需处理" ? #ffccc7 :
+                            food.status == "临期" || food.status == "优先售卖" ? #ffe7ba :
+                            #e8e8e8;
+
+                        food-touch := TouchArea {
+                            mouse-cursor: pointer;
+                        }
+
+                        VerticalBox {
+                            width: 100%;
+                            height: 100%;
+                            padding: 10px;
+                            spacing: 8px;
+
+                            HorizontalBox {
+                                padding: 0px;
+                                spacing: 8px;
+
+                                UText {
+                                    text: food.name;
+                                    color: #333333;
+                                    font-weight: 700;
+                                    horizontal-stretch: 1;
+                                    overflow: elide;
+                                }
+
+                                UTag {
+                                    text: food.status;
+                                    preset: food.status == "需处理" ? UTagPreset.red :
+                                        food.status == "临期" || food.status == "优先售卖" ? UTagPreset.orange :
+                                        UTagPreset.green;
+                                }
+                            }
+
+                            HorizontalBox {
+                                padding: 0px;
+                                spacing: 10px;
+
+                                UText {
+                                    text: food.category;
+                                    color: #666666;
+                                    width: 54px;
+                                    overflow: elide;
+                                }
+
+                                UText {
+                                    text: food.zone;
+                                    color: #666666;
+                                    width: 62px;
+                                    overflow: elide;
+                                }
+
+                                UText {
+                                    text: food.quantity;
+                                    color: #666666;
+                                    horizontal-stretch: 1;
+                                    overflow: elide;
+                                }
+                            }
+
+                            HorizontalBox {
+                                padding: 0px;
+                                spacing: 10px;
+
+                                UText {
+                                    text: "温度 " + food.temperature;
+                                    color: food.category == "冻品" ? #1890ff : #52c41a;
+                                    horizontal-stretch: 1;
+                                    overflow: elide;
+                                }
+
+                                UText {
+                                    text: food.expiry;
+                                    color: food.expiry == "今日到期" ? #ff4d4f :
+                                        food.expiry == "剩余 1 天" || food.expiry == "剩余 2 天" ? #fa8c16 :
+                                        #666666;
+                                    horizontal-alignment: right;
+                                    overflow: elide;
+                                }
+                            }
+                        }
+                    }
+
                     Rectangle {
                         vertical-stretch: 1;
                     }

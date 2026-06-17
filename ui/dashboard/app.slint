@@ -1,12 +1,12 @@
 import { VerticalBox, HorizontalBox, Palette } from "std-widgets.slint";
 import "../static/DingTalk-JinBuTi.ttf";
-import { LogMessage, AlarmMessage } from "structs.slint";
+import { LogMessage, AlarmMessage, FoodItem } from "structs.slint";
 import { TopBar } from "top_bar.slint";
 import { BottomBar } from "bottom_bar.slint";
 import { VideoPane } from "video_pane.slint";
 import { LogsPane } from "logs_pane.slint";
 
-export { LogMessage, AlarmMessage }
+export { LogMessage, AlarmMessage, FoodItem }
 export component App inherits Window {
     callback quit-requested();
 
@@ -15,80 +15,200 @@ export component App inherits Window {
 
     in property <string> system-time: "2025-05-29 16:48:30";
     in property <string> cpu-usage: "28%";
-    in property <string> mem-usage: "512MB";
+    in property <string> mem-usage: "30MB";
     in property <string> net-usage: "2.3Mbps";
 
     in property <string> video-resolution: "1920x1080";
-    in property <string> video-fps: "30";
+    in property <string> video-fps: "25";
     in property <string> video-codec: "H.264";
-    in property <string> video-latency: "120ms";
-    in property <string> video-url: "rtsp://192.168.1.123:8554/mystream";
+    in property <string> video-latency: "82ms";
+    in property <string> video-url: "rtsp://192.168.31.110:8554/live/predict";
     default-font-family: "DingTalk JinBuTi";
-    in property <int> alarm-count: 12;
-    in property <int> log-count: 120;
+    in property <int> alarm-count: 5;
+    in property <int> log-count: 6;
+    in property <int> food-count: 8;
 
     in property <[LogMessage]> logs: [
         {
-            time: "16:47:58",
+            time: "08:30:02",
             level: "INFO",
-            message: "已连接到流媒体服务器",
-            detail: "RTSP/RTMP 流媒体连接建立成功，正在等待首帧数据。",
-            image_url: "https://picsum.photos/seed/rtsp-log/720/405",
+            message: "冷藏室温度稳定在 3.8C",
+            detail: "冷藏室最近 15 分钟温度波动范围 3.6C - 4.0C，压缩机按节能曲线间歇运行，食品展示区处于正常保鲜状态。",
+            image_url: "https://picsum.photos/seed/fridge-log/720/405",
             snapshot: @image-url(""),
         },
         {
-            time: "16:48:05",
+            time: "08:42:18",
+            level: "INFO",
+            message: "冷冻室温度稳定在 -18.6C",
+            detail: "冷冻室温度达到设定目标，蒸发器风机运行正常，未检测到异常结霜或传感器漂移。",
+            image_url: "https://picsum.photos/seed/fridge-log/720/405",
+            snapshot: @image-url(""),
+        },
+        {
+            time: "09:05:41",
+            level: "DEBUG",
+            message: "压缩机进入低功耗巡航",
+            detail: "压缩机连续运行 12 分钟后切换到低功耗巡航，当前电流 1.8A，预计 6 分钟后再次采样判断。",
+            image_url: "https://picsum.photos/seed/fridge-log/720/405",
+            snapshot: @image-url(""),
+        },
+        {
+            time: "09:21:07",
+            level: "INFO",
+            message: "门磁检测: 关门确认",
+            detail: "左侧展示门关闭到位，门封压力正常，未检测到冷气泄漏趋势。",
+            image_url: "https://picsum.photos/seed/fridge-log/720/405",
+            snapshot: @image-url(""),
+        },
+        {
+            time: "10:00:00",
+            level: "INFO",
+            message: "自动除霜计划完成",
+            detail: "蒸发器除霜周期结束，回温时间 4 分 20 秒，排水盘液位正常，制冷已恢复。",
+            image_url: "https://picsum.photos/seed/fridge-log/720/405",
+            snapshot: @image-url(""),
+        },
+        {
+            time: "10:18:33",
             level: "WARN",
-            message: "网络延迟较高: 120ms",
-            detail: "链路延迟超过预设阈值，建议检查推流端、交换机和服务器负载。",
-            image_url: "https://picsum.photos/seed/rtsp-log/720/405",
-            snapshot: @image-url(""),
-        },
-        {
-            time: "16:48:10",
-            level: "INFO",
-            message: "帧率稳定",
-            detail: "最近 10 秒内帧率波动保持在正常范围。",
-            image_url: "https://picsum.photos/seed/rtsp-log/720/405",
+            message: "冷藏室湿度偏高 78%",
+            detail: "冷藏室湿度高于建议范围，可能与频繁开门或热食放入有关。系统已提高风机转速并持续观察。",
+            image_url: "https://picsum.photos/seed/fridge-log/720/405",
             snapshot: @image-url(""),
         },
     ];
 
     in property <[AlarmMessage]> alarms: [
         {
-            time: "16:48:25",
+            time: "10:22:15",
             level: "高危",
-            message: "人员闯入检测",
+            message: "柜门长时间未关闭",
             status: "未处理",
-            detail: "检测区域 A-03 出现人员闯入，目标停留超过阈值。请核验现场画面并尽快处理。",
-            image_url: "https://picsum.photos/seed/rtsp-alarm/720/405",
+            detail: "A-01 左侧展示门已打开 126 秒，冷藏室温度从 3.8C 升至 6.2C。请立即确认门体是否关严，避免食品温度超标。",
+            image_url: "https://picsum.photos/seed/fridge-alarm/720/405",
             snapshot: @image-url(""),
         },
         {
-            time: "16:47:30",
+            time: "10:19:48",
             level: "中危",
-            message: "区域入侵检测",
+            message: "冷藏室温度接近上限",
             status: "未处理",
-            detail: "周界区域出现移动目标，系统已截取触发帧用于复核。",
-            image_url: "https://picsum.photos/seed/rtsp-alarm/720/405",
+            detail: "冷藏室当前温度 7.6C，接近设定上限 8.0C。系统已提升压缩机输出并建议检查门封、装载量和出风口遮挡情况。",
+            image_url: "https://picsum.photos/seed/fridge-alarm/720/405",
             snapshot: @image-url(""),
         },
         {
-            time: "16:45:12",
-            level: "低危",
-            message: "移动物体检测",
-            status: "已处理",
-            detail: "画面左侧出现短时移动目标，已完成人工确认并归档。",
-            image_url: "https://picsum.photos/seed/rtsp-alarm/720/405",
+            time: "09:58:02",
+            level: "中危",
+            message: "蒸发器结霜偏厚",
+            status: "处理中",
+            detail: "蒸发器温差异常，疑似结霜偏厚。系统已安排一次短除霜周期，完成后复测制冷效率。",
+            image_url: "https://picsum.photos/seed/fridge-alarm/720/405",
             snapshot: @image-url(""),
+        },
+        {
+            time: "09:33:27",
+            level: "低危",
+            message: "库存托盘摆放遮挡出风口",
+            status: "已处理",
+            detail: "柜内摄像头识别到第二层托盘靠近出风口，可能影响温度均匀性。已记录现场处理结果。",
+            image_url: "https://picsum.photos/seed/fridge-alarm/720/405",
+            snapshot: @image-url(""),
+        },
+        {
+            time: "08:47:10",
+            level: "低危",
+            message: "冷凝器清洁周期提醒",
+            status: "已处理",
+            detail: "冷凝器累计运行 168 小时，达到清洁提醒周期。建议巡检滤网和散热片积尘情况。",
+            image_url: "https://picsum.photos/seed/fridge-alarm/720/405",
+            snapshot: @image-url(""),
+        },
+    ];
+
+    in property <[FoodItem]> foods: [
+        {
+            name: "鲜牛奶 950ml",
+            category: "乳制品",
+            zone: "冷藏 A1",
+            quantity: "18 盒",
+            temperature: "3.8C",
+            expiry: "剩余 5 天",
+            status: "正常",
+        },
+        {
+            name: "低温酸奶",
+            category: "乳制品",
+            zone: "冷藏 A2",
+            quantity: "32 杯",
+            temperature: "4.1C",
+            expiry: "剩余 2 天",
+            status: "临期",
+        },
+        {
+            name: "三文鱼切片",
+            category: "海鲜",
+            zone: "冷藏 B1",
+            quantity: "6 盒",
+            temperature: "2.6C",
+            expiry: "剩余 1 天",
+            status: "优先售卖",
+        },
+        {
+            name: "精品草莓",
+            category: "水果",
+            zone: "冷藏 C1",
+            quantity: "12 盒",
+            temperature: "5.2C",
+            expiry: "剩余 3 天",
+            status: "正常",
+        },
+        {
+            name: "即食沙拉",
+            category: "鲜食",
+            zone: "冷藏 C2",
+            quantity: "9 份",
+            temperature: "4.6C",
+            expiry: "今日到期",
+            status: "临期",
+        },
+        {
+            name: "冷冻牛肉卷",
+            category: "冻品",
+            zone: "冷冻 D1",
+            quantity: "24 袋",
+            temperature: "-18.6C",
+            expiry: "剩余 45 天",
+            status: "正常",
+        },
+        {
+            name: "速冻水饺",
+            category: "冻品",
+            zone: "冷冻 D2",
+            quantity: "40 袋",
+            temperature: "-19.1C",
+            expiry: "剩余 90 天",
+            status: "正常",
+        },
+        {
+            name: "鲜切鸡胸肉",
+            category: "肉禽",
+            zone: "冷藏 B2",
+            quantity: "4 盒",
+            temperature: "3.2C",
+            expiry: "今日到期",
+            status: "需处理",
         },
     ];
 
     preferred-width: 1366px;
     preferred-height: 768px;
+    full-screen: true;
+    no-frame: true;
     min-width: 1024px;
     min-height: 600px;
-    title: "智能监控终端";
+    title: "基于高性能边缘计算SoC的智能冰箱食材视觉识别与库存管理系统设计与实现";
     background: #f0f2f5;
 
     init => {
@@ -126,6 +246,8 @@ export component App inherits Window {
                 log-count: root.log-count;
                 alarms: root.alarms;
                 alarm-count: root.alarm-count;
+                foods: root.foods;
+                food-count: root.food-count;
             }
         }
 

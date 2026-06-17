@@ -16,7 +16,7 @@ export component TopBar inherits HorizontalBox {
         alignment: start;
 
         UText {
-            text: "智能监控终端";
+            text: "智能冷柜显示终端";
             font-size: 16px;
             font-weight: 700;
             color: #333333;
@@ -47,7 +47,7 @@ export component TopBar inherits HorizontalBox {
             }
 
             UText {
-                text: root.stream-error == "" ? "已连接" : "连接异常";
+                text: root.stream-error == "" ? "柜内摄像头在线" : "摄像头异常";
                 color: #333333;
                 vertical-alignment: center;
             }

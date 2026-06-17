@@ -89,20 +89,20 @@ export component VideoPane inherits VerticalBox {
                 alignment: center;
 
                 UText {
-                    text: "视频状态";
+                    text: "柜内画面";
                     font-weight: 700;
                     font-size: 16px;
                     color: #333333;
                 }
 
                 UText {
-                    text: "流媒体: " + root.video-url;
+                    text: "摄像头: " + root.video-url;
                     color: #666666;
                     overflow: clip;
                 }
 
                 UText {
-                    text: root.stream-error == "" ? "状态: 正常" : "状态: 异常 (" + root.stream-error + ")";
+                    text: root.stream-error == "" ? "状态: 画面正常，柜内照明与温控采集在线" : "状态: 摄像头异常 (" + root.stream-error + ")";
                     color: #666666;
                     overflow: clip;
                 }
