@@ -22,7 +22,7 @@ export component App inherits Window {
     in property <string> video-fps: "25";
     in property <string> video-codec: "H.264";
     in property <string> video-latency: "82ms";
-    in property <string> video-url: "rtsp://192.168.31.110:8554/live/predict";
+    in property <string> video-url: "rtsp://192.168.31.110:8554/live/obs";
     default-font-family: "DingTalk JinBuTi";
     in property <int> alarm-count: 5;
     in property <int> log-count: 6;
@@ -204,8 +204,8 @@ export component App inherits Window {
 
     preferred-width: 1366px;
     preferred-height: 768px;
-    full-screen: true;
-    no-frame: true;
+    full-screen: false;
+    no-frame: false;
     min-width: 1024px;
     min-height: 600px;
     title: "基于高性能边缘计算SoC的智能冰箱食材视觉识别与库存管理系统设计与实现";
