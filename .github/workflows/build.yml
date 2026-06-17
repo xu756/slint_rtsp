@@ -1,9 +1,9 @@
 name: Build Rust Slint (Linux ARM64)
 
 on:
-  # push:
-  #   branches: [master]
-  workflow_dispatch:
+  push:
+    branches: [master]
+  # workflow_dispatch:
 
 jobs:
   build:
@@ -38,7 +38,8 @@ jobs:
             build-essential pkg-config \
             libfontconfig1-dev libfreetype6-dev \
             libx11-dev libxkbcommon-dev libxrandr-dev libxrender-dev libxi-dev \
-            libgl1-mesa-dev
+            libgl1-mesa-dev \
+            libasound2-dev 
 
       - name: Build (release)
         run: |
