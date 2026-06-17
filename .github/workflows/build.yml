@@ -30,21 +30,23 @@ jobs:
           workspaces: |
             . -> target
 
-      - name: Install system deps
+      - name: Install system deps (X11 + fontconfig + FFmpeg)
         run: |
           sudo apt update
           sudo apt install -y --no-install-recommends \
-            build-essential \
-            pkg-config \
-            libfontconfig1-dev \
-            libfreetype6-dev \
-            libx11-dev \
-            libxkbcommon-dev \
-            libxrandr-dev \
-            libxrender-dev \
-            libxi-dev \
+            build-essential pkg-config \
+            libfontconfig1-dev libfreetype6-dev \
+            libx11-dev libxkbcommon-dev libxrandr-dev libxrender-dev libxi-dev \
             libgl1-mesa-dev \
-            libasound2-dev
+            libasound2-dev \
+            ffmpeg \
+            libavutil-dev \
+            libavcodec-dev \
+            libavformat-dev \
+            libavfilter-dev \
+            libavdevice-dev \
+            libswscale-dev \
+            libswresample-dev
 
       - name: Show build machine arch
         run: |
