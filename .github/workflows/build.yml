@@ -1,56 +1,76 @@
-name: Build Rust Slint (Linux ARM64)
+name: Build Rust Slint Linux ARM64
 
 on:
   push:
     branches: [master]
-  # workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-24.04-arm
+
     env:
       CARGO_TERM_COLOR: always
-      # 如果是 workspace，改成你的包名（例如 bin / app / ui 等）
+      # 注意这里必须和 Cargo.toml 里的 bin 名一致
       PACKAGE_NAME: slint_rstp
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup Rust (stable)
+      - name: Setup Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           profile: minimal
 
-      # ✅ Cargo 缓存（registry + git + target）
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
-          # workspace 的话可以指定工作目录（可选）
           workspaces: |
             . -> target
 
-      - name: Install system deps (X11 + fontconfig)
+      - name: Install system deps
         run: |
           sudo apt update
           sudo apt install -y --no-install-recommends \
-            build-essential pkg-config \
-            libfontconfig1-dev libfreetype6-dev \
-            libx11-dev libxkbcommon-dev libxrandr-dev libxrender-dev libxi-dev \
+            build-essential \
+            pkg-config \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            libx11-dev \
+            libxkbcommon-dev \
+            libxrandr-dev \
+            libxrender-dev \
+            libxi-dev \
             libgl1-mesa-dev \
-            libasound2-dev 
+            libasound2-dev
 
-      - name: Build (release)
+      - name: Show build machine arch
         run: |
-          cargo build --release
+          uname -m
+          rustc -Vv
+          cargo -V
 
-      - name: List release outputs
+      - name: Build release
         run: |
-          ls -lah target/release
+          cargo build --release --locked
 
-      - name: Upload Artifact
+      - name: Check output binary
+        run: |
+          file target/release/${{ env.PACKAGE_NAME }}
+          ldd target/release/${{ env.PACKAGE_NAME }} || true
+          ls -lah target/release/${{ env.PACKAGE_NAME }}
+
+      - name: Package artifact
+        run: |
+          mkdir -p dist
+          cp target/release/${{ env.PACKAGE_NAME }} dist/
+          chmod +x dist/${{ env.PACKAGE_NAME }}
+          tar -czvf ${{ env.PACKAGE_NAME }}-linux-arm64.tar.gz -C dist .
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PACKAGE_NAME }}-linux-arm64
-          path: target/release/${{ env.PACKAGE_NAME }}
+          path: ${{ env.PACKAGE_NAME }}-linux-arm64.tar.gz
