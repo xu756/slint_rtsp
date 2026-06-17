@@ -4875,7 +4875,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "slint_rstp"
+name = "slint_rtsp"
 version = "0.1.0"
 dependencies = [
  "anyhow",
