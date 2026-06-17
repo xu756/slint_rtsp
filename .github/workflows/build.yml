@@ -12,7 +12,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       # 注意这里必须和 Cargo.toml 里的 bin 名一致
-      PACKAGE_NAME: slint_rstp
+      PACKAGE_NAME: slint_rtsp
 
     steps:
       - name: Checkout source
