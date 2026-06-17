@@ -34,30 +34,30 @@ export component TopBar inherits HorizontalBox {
             padding: 0px;
             height: 24px;
 
-            Rectangle {
-                width: 10px;
-                background: transparent;
+            // Rectangle {
+            //     width: 10px;
+            //     background: transparent;
 
-                Rectangle {
-                    width: 10px;
-                    height: 10px;
-                    border-radius: 5px;
-                    background: root.stream-error == "" ? #52c41a : #ff4d4f;
-                }
-            }
+            //     Rectangle {
+            //         width: 10px;
+            //         height: 10px;
+            //         border-radius: 5px;
+            //         background: root.stream-error == "" ? #52c41a : #ff4d4f;
+            //     }
+            // }
 
-            UText {
-                text: root.stream-error == "" ? "柜内摄像头在线" : "摄像头异常";
-                color: #333333;
-                vertical-alignment: center;
-            }
+            // UText {
+            //     text: root.stream-error == "" ? "柜内摄像头在线" : "摄像头异常";
+            //     color: #333333;
+            //     vertical-alignment: center;
+            // }
         }
 
-        UText {
-            text: root.video-url;
-            color: #666666;
-            vertical-alignment: center;
-        }
+        // UText {
+        //     text: root.video-url;
+        //     color: #666666;
+        //     vertical-alignment: center;
+        // }
     }
 
     HorizontalBox {
