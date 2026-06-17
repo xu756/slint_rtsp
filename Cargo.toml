@@ -1,5 +1,5 @@
 [package]
-name = "slint_rstp"
+name = "slint_rtsp"
 version = "0.1.0"
 edition = "2024"
 build = "src/build.rs"
