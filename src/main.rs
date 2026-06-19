@@ -5,8 +5,8 @@ use slint::Model;
 
 mod player;
 
-const VIDEO_URL: &str = "rtsp://192.168.31.110:8554/live/obs";
-const DISPLAY_CAMERA_URL: &str = "rtsp://192.168.31.110:8554/live/obs";
+const VIDEO_URL: &str = "rtsp://192.168.42.1/h264";
+const DISPLAY_CAMERA_URL: &str = "rtsp://192.168.42.1/h264";
 const LOG_SNAPSHOT_URL: &str = "https://picsum.photos/seed/fridge-log/720/405";
 const ALARM_SNAPSHOT_URL: &str = "https://picsum.photos/seed/fridge-alarm/720/405";
 
